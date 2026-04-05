@@ -1,41 +1,27 @@
 name: AIC CI Pipeline
 
-# เฝ้าดูเหตุการณ์เหล่านี้
 on:
   push:
-    branches: [ main ]        # มีคน push ขึ้น main
+    branches: [ main, feature/* ]
   pull_request:
-    branches: [ main ]        # มีคนเปิด Pull Request
+    branches: [ main ]
 
 jobs:
-  # งานที่ 1 — ทดสอบโค้ด
   test:
-    runs-on: ubuntu-latest    # รันบน Ubuntu
+    runs-on: ubuntu-latest
     steps:
-      # ดึงโค้ดมา
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # แสดงข้อมูล
-      - name: Show info
-        run: |
-          echo "กำลังรัน CI Pipeline!"
-          echo "Branch: ${{ github.ref }}"
-          echo "Commit: ${{ github.sha }}"
-          python3 --version
+      - name: Install pytest
+        run: pip install pytest
 
-      # ทดสอบ
       - name: Run tests
-        run: |
-          echo "ทดสอบโค้ด..."
-          python3 -c "print('ทดสอบผ่าน!')"
+        run: pytest tests/ -v
 
-  # งานที่ 2 — Build และ Push Docker Image
   build-and-push:
-    needs: test               # รอให้ test ผ่านก่อน
+    needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # รันเฉพาะตอน push main
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
