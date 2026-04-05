@@ -1,0 +1,55 @@
+name: AIC CI Pipeline
+
+# เฝ้าดูเหตุการณ์เหล่านี้
+on:
+  push:
+    branches: [ main ]        # มีคน push ขึ้น main
+  pull_request:
+    branches: [ main ]        # มีคนเปิด Pull Request
+
+jobs:
+  # งานที่ 1 — ทดสอบโค้ด
+  test:
+    runs-on: ubuntu-latest    # รันบน Ubuntu
+    steps:
+      # ดึงโค้ดมา
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # แสดงข้อมูล
+      - name: Show info
+        run: |
+          echo "กำลังรัน CI Pipeline!"
+          echo "Branch: ${{ github.ref }}"
+          echo "Commit: ${{ github.sha }}"
+          python3 --version
+
+      # ทดสอบ
+      - name: Run tests
+        run: |
+          echo "ทดสอบโค้ด..."
+          python3 -c "print('ทดสอบผ่าน!')"
+
+  # งานที่ 2 — Build และ Push Docker Image
+  build-and-push:
+    needs: test               # รอให้ test ผ่านก่อน
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'  # รันเฉพาะตอน push main
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/chwp-608/aic:latest
