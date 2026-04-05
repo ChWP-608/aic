@@ -3,9 +3,9 @@ name: AIC CI Pipeline
 # เฝ้าดูเหตุการณ์เหล่านี้
 on:
   push:
-    branches: [ main ]        # มีคน push ขึ้น main
+    branches: [ main, feature/* ]    # เพิ่ม feature/*
   pull_request:
-    branches: [ main ]        # มีคนเปิด Pull Request
+    branches: [ main ]
 
 jobs:
   # งานที่ 1 — ทดสอบโค้ด
